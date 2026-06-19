@@ -101,7 +101,32 @@ def main():
         )
     )
 
-    app.run_polling()
+    import asyncio
+
+def main():
+
+    app = Application.builder().token(TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(buttons))
+    app.add_handler(
+        MessageHandler(
+            filters.PHOTO,
+            receive_photo
+        )
+    )
+
+    async def run():
+        await app.initialize()
+        await app.start()
+        await app.updater.start_polling()
+        await app.updater.idle()
+
+    asyncio.run(run())
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
