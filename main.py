@@ -9,7 +9,7 @@ from telegram.ext import (
     filters,
 )
 
-# 🔴 مهم: ضع BOT_TOKEN في Render Environment Variables
+# ================== CONFIG ==================
 TOKEN = os.getenv("BOT_TOKEN")
 
 OWNER_ID = 8013404749
@@ -19,15 +19,15 @@ BOOK_TITLE = "Laugh with Your Brain"
 VOLUME = "Volume 1"
 
 PRICE = "5 USDT"
-
 WALLET_ADDRESS = "TS3z9oKUcQd9iMSmbjg8h8qHFotu4tEEWe"
 
 SUPPORT_LINK = "https://t.me/Rasha2762"
 
 SAMPLE_FILE = "sample.pdf"
+# ============================================
 
 
-# ---------------- START ----------------
+# ============ START COMMAND ============
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
@@ -37,44 +37,44 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        f"Welcome to {SERIES_NAME}\n\n{VOLUME}\n{BOOK_TITLE}",
+        f"Welcome to {SERIES_NAME}\n{VOLUME}\n{BOOK_TITLE}",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
-# ---------------- BUTTONS ----------------
+# ============ BUTTON HANDLER ============
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
     await query.answer()
 
     if query.data == "sample":
-
         try:
             with open(SAMPLE_FILE, "rb") as pdf:
                 await query.message.reply_document(
                     document=pdf,
                     caption="Free Sample"
                 )
-        except FileNotFoundError:
-            await query.message.reply_text("Sample file not found on server.")
+        except Exception:
+            await query.message.reply_text("Sample file is not available on server.")
 
     elif query.data == "buy":
-
         await query.message.reply_text(
             f"📚 {BOOK_TITLE}\n\n"
             f"💰 Price: {PRICE}\n\n"
-            f"Wallet Address:\n{WALLET_ADDRESS}\n\n"
-            f"After payment, send screenshot here."
+            f"Wallet:\n{WALLET_ADDRESS}\n\n"
+            "Send payment proof after transfer."
         )
 
     elif query.data == "support":
-
         await query.message.reply_text(SUPPORT_LINK)
 
 
-# ---------------- PHOTO HANDLER ----------------
+# ============ PHOTO HANDLER ============
 async def receive_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message.photo:
+        return
 
     user = update.message.from_user
 
@@ -84,11 +84,15 @@ async def receive_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption=f"Payment proof\nUser ID: {user.id}\nUsername: @{user.username}"
     )
 
-    await update.message.reply_text("Payment proof received. Waiting for review.")
+    await update.message.reply_text("Payment received. Waiting for review.")
 
 
-# ---------------- MAIN ----------------
+# ============ MAIN ============
 def main():
+
+    # حماية من فقدان التوكن
+    if not TOKEN:
+        raise RuntimeError("BOT_TOKEN is missing in Render environment variables")
 
     app = Application.builder().token(TOKEN).build()
 
@@ -97,3 +101,8 @@ def main():
     app.add_handler(MessageHandler(filters.PHOTO, receive_photo))
 
     app.run_polling()
+
+
+# ============ START ============
+if __name__ == "__main__":
+    main()
