@@ -1,5 +1,4 @@
 import os
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -10,6 +9,7 @@ from telegram.ext import (
     filters,
 )
 
+# 🔴 مهم: ضع BOT_TOKEN في Render Environment Variables
 TOKEN = os.getenv("BOT_TOKEN")
 
 OWNER_ID = 8013404749
@@ -27,6 +27,7 @@ SUPPORT_LINK = "https://t.me/Rasha2762"
 SAMPLE_FILE = "sample.pdf"
 
 
+# ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
@@ -41,6 +42,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ---------------- BUTTONS ----------------
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
@@ -48,11 +50,14 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "sample":
 
-        with open(SAMPLE_FILE, "rb") as pdf:
-            await query.message.reply_document(
-                document=pdf,
-                caption="Free Sample"
-            )
+        try:
+            with open(SAMPLE_FILE, "rb") as pdf:
+                await query.message.reply_document(
+                    document=pdf,
+                    caption="Free Sample"
+                )
+        except FileNotFoundError:
+            await query.message.reply_text("Sample file not found on server.")
 
     elif query.data == "buy":
 
@@ -60,20 +65,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"📚 {BOOK_TITLE}\n\n"
             f"💰 Price: {PRICE}\n\n"
             f"Wallet Address:\n{WALLET_ADDRESS}\n\n"
-            f"After payment, send a screenshot here."
+            f"After payment, send screenshot here."
         )
 
     elif query.data == "support":
 
-        await query.message.reply_text(
-            SUPPORT_LINK
-        )
+        await query.message.reply_text(SUPPORT_LINK)
 
 
-async def receive_photo(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
+# ---------------- PHOTO HANDLER ----------------
+async def receive_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.message.from_user
 
@@ -83,40 +84,16 @@ async def receive_photo(
         caption=f"Payment proof\nUser ID: {user.id}\nUsername: @{user.username}"
     )
 
-    await update.message.reply_text(
-        "Payment proof received. Waiting for review."
-    )
+    await update.message.reply_text("Payment proof received. Waiting for review.")
 
 
+# ---------------- MAIN ----------------
 def main():
 
-    app = Application.builder().token(TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(
-        MessageHandler(
-            filters.PHOTO,
-            receive_photo
-        )
-    )
-
-    import asyncio
-
-def main():
-
-    app = Application.builder().token(TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(
-        MessageHandler(
-            filters.PHOTO,
-            receive_photo
-        )
-    )
-
-    def main():
+    # تأكد أن التوكن موجود
+    if not TOKEN:
+        print("BOT_TOKEN is missing in environment variables!")
+        return
 
     app = Application.builder().token(TOKEN).build()
 
@@ -125,14 +102,6 @@ def main():
     app.add_handler(MessageHandler(filters.PHOTO, receive_photo))
 
     app.run_polling()
-
-
-if __name__ == "__main__":
-    main()
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
