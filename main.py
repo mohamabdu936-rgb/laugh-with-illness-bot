@@ -90,11 +90,6 @@ async def receive_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ---------------- MAIN ----------------
 def main():
 
-    # تأكد أن التوكن موجود
-    if not TOKEN:
-        print("BOT_TOKEN is missing in environment variables!")
-        return
-
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -102,7 +97,3 @@ def main():
     app.add_handler(MessageHandler(filters.PHOTO, receive_photo))
 
     app.run_polling()
-
-
-if __name__ == "__main__":
-    main()
