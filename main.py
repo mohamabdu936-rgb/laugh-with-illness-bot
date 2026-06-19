@@ -12,7 +12,7 @@ from telegram.ext import (
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-OWNER_ID = 123456789
+OWNER_ID = 8013404749
 
 SERIES_NAME = "Laugh with Illness Series"
 BOOK_TITLE = "Laugh with Your Brain"
